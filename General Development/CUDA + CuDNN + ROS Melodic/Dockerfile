@@ -103,5 +103,7 @@ RUN echo 'export PATH=/usr/local/cuda/bin${PATH:+:${PATH}}' >> /home/sam/.bashrc
 RUN echo 'root:mm123456' | chpasswd
 RUN echo 'normal:mm123456' | chpasswd
 
+USER sam
+
 CMD ["bash"]
 
