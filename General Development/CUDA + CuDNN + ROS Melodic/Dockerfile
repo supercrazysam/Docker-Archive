@@ -1,6 +1,7 @@
 # This is an auto generated Dockerfile for ros:ros-core
 # generated from docker_images/create_ros_core_image.Dockerfile.em
-FROM nvidia/cuda
+FROM nvidia/cuda:10.2-cudnn7-devel
+#:10.2-cudnn7-devel
 #:9.0-devel
 
 RUN apt update
