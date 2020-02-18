@@ -37,16 +37,29 @@ ENV ROS_DISTRO melodic
 RUN rosdep init && \
   rosdep update && rosdep fix-permissions
 
+
+
+
+############Creating Super Sam###################
+RUN useradd -ms /bin/bash sam
+RUN echo "sam:mm123456" | chpasswd 
+RUN adduser sam sudo
+
+
 ####ADDED to execute in normal user mode
 RUN useradd -ms /bin/bash normal
 USER normal
 WORKDIR /home/normal
 
 RUN rosdep update
-
 RUN echo "source /opt/ros/melodic/setup.bash" >> ~/.bashrc
 
-######SOURCE ROS base
+USER sam
+RUN echo "source /opt/ros/melodic/setup.bash" >> ~/.bashrc
+
+############################SOURCE ROS base######################
+
+
 USER normal
 WORKDIR /home/normal
 RUN /bin/bash -c "source /opt/ros/melodic/setup.bash"
@@ -57,34 +70,38 @@ RUN apt install python-rosinstall python-rosinstall-generator python-wstool buil
 
 RUN apt install python3-pip python-pip -y
 
-RUN /bin/bash -c "pip3 install tensorflow-gpu==1.14"
+RUN /bin/bash -c "pip3 install tensorflow-gpu==1.14 --default-timeout=100" 
 RUN /bin/bash -c "pip3 install scipy==1.1"
 RUN /bin/bash -c "pip3 install imutils scikit-image keras matplotlib"
 
-#SSH
-RUN apt-get install -y openssh-server
-
+##################################Entrypoint Script####################
 #ROS setup ros environment
 
 RUN echo '#!/bin/bash' >> /ros_entrypoint.sh
 RUN echo 'set -e'      >> /ros_entrypoint.sh
 RUN echo 'source "/opt/ros/$ROS_DISTRO/setup.bash"' >> /ros_entrypoint.sh
+
 RUN echo 'exec "$@"'   >> /ros_entrypoint.sh
 
 RUN chmod +x /ros_entrypoint.sh
 
 ENTRYPOINT ["/ros_entrypoint.sh"]
+
+
+
+
+############bashrc for remote access normal account##########################
+
+
+#nvcc for remote ssh.... somehow local nvcc is ok but remote cannot find
+RUN ln -sf /usr/local/cuda-10.2 /usr/local/cuda
+RUN echo 'export PATH=/usr/local/cuda/bin${PATH:+:${PATH}}' >> /home/normal/.bashrc
+
+RUN echo 'export PATH=/usr/local/cuda/bin${PATH:+:${PATH}}' >> /home/sam/.bashrc
+
+
+RUN echo 'root:mm123456' | chpasswd
+RUN echo 'normal:mm123456' | chpasswd
+
 CMD ["bash"]
-
-
-#IPconfig let you see your docker ip
-#RUN apt install iproute2 -y
-#Firewall install and allow port 22 for ssh
-#RUN apt install ufw -y
-#RUN ufw allow 22
-
-#change root password for ssh access
-#RUN echo "m" | passwd --stdin root 
-
-
 
