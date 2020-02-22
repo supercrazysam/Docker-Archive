@@ -121,10 +121,24 @@ RUN echo "AllowUsers root sam" >> /etc/ssh/sshd_config
 ENV NOTVISIBLE "in users profile"
 RUN echo "export VISIBLE=now" >> /etc/profile
 
+#####################Nautilus remote setting######################
+RUN apt install libcanberra-gtk-module libcanberra-gtk3-module -y
+RUN apt install nautilus -y
+RUN mkdir /home/sam/.config
+RUN mkdir /home/sam/.config/nautilus
+RUN chmod a+rwx /home/sam/.config/nautilus
+
+RUN apt-get update
+RUN apt-get install eog gedit -y 
+RUN apt install idle3 -y
+#gedit and image_viewer
+
+############################################
+
+
 EXPOSE 22
 CMD ["/usr/sbin/sshd", "-D"]
 #######################################################################
 
 CMD ["bash"]
-
 
